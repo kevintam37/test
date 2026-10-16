@@ -32,6 +32,6 @@ function multi(R,q,correctArr,wrongArr,exp,extra){
  return Object.assign({t:'multi',q,opts:all.map(o=>o.t),a:all.map((o,i)=>o.ok?i:-1).filter(i=>i>=0),exp},extra||{});
 }
 /* Collect n unique questions from fn (which may return null or throw to be retried) */
-function gather(n,fn){const out=[],seen=new Set();let tries=0;while(out.length<n&&tries++<800){let q=null;try{q=fn()}catch(e){q=null}if(!q)continue;const k=q.q+'|'+(q.pics||'')+'|'+(q.opts||[]).join('|')+'|'+(q.acc||[]).join('|');if(seen.has(k))continue;seen.add(k);out.push(q)}if(out.length<n)throw new Error('could not generate '+n);return out}
+function gather(n,fn){const out=[],seen=new Set();let tries=0;while(out.length<n&&tries++<800){let q=null;try{q=fn()}catch(e){q=null}if(!q)continue;const k=q.q+'|'+(q.pics||'')+'|'+(q.opts||[]).slice().sort().join('|')+'|'+(q.acc||[]).join('|');if(seen.has(k))continue;seen.add(k);out.push(q)}if(out.length<n)throw new Error('could not generate '+n);return out}
 /* Pick n distinct bank items (re-shuffled so a new set looks different) */
 const bankPick=(R,bank,n)=>R.sample(bank,Math.min(n,bank.length));
