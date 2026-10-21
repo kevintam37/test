@@ -370,4 +370,6 @@ function chkGrid(){const q=cur();const grid=q.rows.map((r,k)=>q.cols.map((c,j)=>
 function showModel(){const q=cur();const written=($('ta').value||'').trim();lastGiven=written||'(nothing written)';pending={written};$('fb').innerHTML=`<div class="model"><b>Model answer:</b> ${q.model}</div><p class="small">Did your answer match?</p><div class="row"><button class="pill" onclick="next(true)">I got it ✅</button><button class="pill" onclick="next(false)">Not yet</button></div>`;$('chk').disabled=true}
 home();
 
-</script></body></html>
+</script><script src="../njsla-shared/sling.js"></script>
+<script>Sling.attach();</script>
+</body></html>
