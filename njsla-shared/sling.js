@@ -12,7 +12,8 @@ var MCOL=['#7a5cf0','#e8744f','#2aa876'];
 /* ---------- storage ---------- */
 function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
 function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
-function modeOn(){return lsGet(MODE_KEY)!=='0'}          /* default: on */
+function bridgeChosen(){return !!window.Bridge&&lsGet('kids_game')==='bridge'}  /* pages that also load bridge.js can pick Bridge Engineer */
+function modeOn(){return lsGet(MODE_KEY)!=='0'&&!bridgeChosen()}          /* default: on */
 var soundOn=lsGet(SND_KEY)!=='0';
 
 /* ---------- sound ---------- */
@@ -278,6 +279,20 @@ function homeCard(){
   css();
   var old=document.getElementById('sling-card');if(old&&old.parentNode)old.parentNode.removeChild(old);
   var on=modeOn(),d=document.createElement('div');d.className='sling-card';d.id='sling-card';
+  if(window.Bridge){
+    var g=lsGet(MODE_KEY)==='0'?'off':bridgeChosen()?'bridge':'sling';
+    var desc={sling:'Sling Showdown: every right answer earns a shot. Knock out the monsters. The levels never run out.',
+      bridge:'Bridge Engineer: every right answer earns truck trips. Design a real bridge, then a heavy truck tests it. Build it right to move on. The levels never run out.',
+      off:'No game. Just the practice questions.'};
+    d.innerHTML='<div class="sc-t"><b>Practice game</b><small>'+desc[g]+'</small></div><div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end">'+
+      [['sling','Sling'],['bridge','Bridge'],['off','Off']].map(function(x){return '<button data-g="'+x[0]+'" aria-pressed="'+(g===x[0])+'">'+x[1]+'</button>'}).join('')+'</div>';
+    st.insertBefore(d,st.firstChild);
+    d.querySelectorAll('[data-g]').forEach(function(btn){btn.onclick=function(){
+      var v=btn.getAttribute('data-g');
+      lsSet(MODE_KEY,v==='off'?'0':'1');lsSet('kids_game',v==='bridge'?'bridge':'sling');homeCard();
+    }});
+    return;
+  }
   d.innerHTML='<div class="sc-t"><b>🎯 Sling Showdown</b><small>Every right answer earns a shot. Knock out the monsters. The levels never run out, so you can keep playing until every question is done.</small></div><button id="sling-toggle" aria-pressed="'+on+'">'+(on?'Game: On':'Game: Off')+'</button>';
   st.insertBefore(d,st.firstChild);
   document.getElementById('sling-toggle').onclick=function(){lsSet(MODE_KEY,modeOn()?'0':'1');homeCard()};
