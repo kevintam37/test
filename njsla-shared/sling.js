@@ -12,7 +12,7 @@ var MCOL=['#7a5cf0','#e8744f','#2aa876'];
 /* ---------- storage ---------- */
 function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
 function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
-function bridgeChosen(){return !!window.Bridge&&lsGet('kids_game')==='bridge'}  /* pages that also load bridge.js can pick Bridge Engineer */
+function bridgeChosen(){var v=lsGet('kids_game');return (!!window.Bridge&&v==='bridge')||(!!window.MiniGames&&MiniGames.has(v))}  /* pages that also load bridge.js / minigames.js can pick those games instead */
 function modeOn(){return lsGet(MODE_KEY)!=='0'&&!bridgeChosen()}          /* default: on */
 var soundOn=lsGet(SND_KEY)!=='0';
 
@@ -279,18 +279,20 @@ function homeCard(){
   css();
   var old=document.getElementById('sling-card');if(old&&old.parentNode)old.parentNode.removeChild(old);
   var on=modeOn(),d=document.createElement('div');d.className='sling-card';d.id='sling-card';
-  if(window.Bridge){
-    var g=lsGet(MODE_KEY)==='0'?'off':bridgeChosen()?'bridge':'sling';
-    var desc={sling:'Sling Showdown: every right answer earns a shot. Knock out the monsters. The levels never run out.',
-      bridge:'Bridge Engineer: every right answer earns truck trips. Design a real bridge, then a heavy truck tests it. Build it right to move on. The levels never run out.',
-      off:'No game. Just the practice questions.'};
-    d.innerHTML='<div class="sc-t"><b>Practice game</b><small>'+desc[g]+'</small></div><div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end">'+
-      [['sling','Sling'],['bridge','Bridge'],['off','Off']].map(function(x){return '<button data-g="'+x[0]+'" aria-pressed="'+(g===x[0])+'">'+x[1]+'</button>'}).join('')+'</div>';
+  if(window.Bridge||window.MiniGames){
+    var v=lsGet('kids_game'),g=lsGet(MODE_KEY)==='0'?'off':bridgeChosen()?v:'sling';
+    var opts=[['sling','Sling Showdown','Sling Showdown: every right answer earns a shot. Knock out the monsters. The levels never run out.']];
+    if(window.Bridge)opts.push(['bridge','Bridge Engineer','Bridge Engineer: every right answer earns truck trips. Design a real bridge, then a heavy truck tests it. Build it right to move on. The levels never run out.']);
+    if(window.MiniGames)MiniGames.list.forEach(function(m){opts.push([m.id,m.name,m.name+': '+m.desc+' Every right answer helps you play.'])});
+    opts.push(['off','No game','No game. Just the practice questions.']);
+    var cur=opts.filter(function(o){return o[0]===g})[0]||opts[0];
+    d.innerHTML='<div class="sc-t"><b>Practice game</b><small id="sling-desc">'+cur[2]+'</small></div><select id="sling-sel" aria-label="Choose a practice game" style="font:inherit;font-weight:800;font-size:14px;border-radius:999px;padding:7px 12px;border:2px solid var(--indigo,#2B3A67);background:var(--card,#fff);color:var(--indigo,#2B3A67);max-width:48%">'+
+      opts.map(function(o){return '<option value="'+o[0]+'"'+(o[0]===cur[0]?' selected':'')+'>'+o[1]+'</option>'}).join('')+'</select>';
     st.insertBefore(d,st.firstChild);
-    d.querySelectorAll('[data-g]').forEach(function(btn){btn.onclick=function(){
-      var v=btn.getAttribute('data-g');
-      lsSet(MODE_KEY,v==='off'?'0':'1');lsSet('kids_game',v==='bridge'?'bridge':'sling');homeCard();
-    }});
+    document.getElementById('sling-sel').onchange=function(){
+      var val=this.value;
+      lsSet(MODE_KEY,val==='off'?'0':'1');lsSet('kids_game',val==='off'?(lsGet('kids_game')||'sling'):val);homeCard();
+    };
     return;
   }
   d.innerHTML='<div class="sc-t"><b>🎯 Sling Showdown</b><small>Every right answer earns a shot. Knock out the monsters. The levels never run out, so you can keep playing until every question is done.</small></div><button id="sling-toggle" aria-pressed="'+on+'">'+(on?'Game: On':'Game: Off')+'</button>';
