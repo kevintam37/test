@@ -154,7 +154,8 @@ if(typeof document!=='undefined'&&document.getElementById('st')){
  seed=parseInt(ls('seed'),10)||0;if(!seed){seed=newSeed();ls('seed',String(seed))}
  LES=buildSets(seed);home();
 }
-</script><script src="../njsla-shared/sling.js?v=2"></script>
+</script><script src="../njsla-shared/sling.js?v=3"></script>
 <script src="../njsla-shared/bridge.js?v=1"></script>
-<script>Sling.attach();Bridge.attach();</script>
+<script src="../njsla-shared/minigames.js?v=1"></script>
+<script>Sling.attach();Bridge.attach();MiniGames.attach();</script>
 </body></html>
